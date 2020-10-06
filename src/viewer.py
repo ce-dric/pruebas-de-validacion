@@ -6,6 +6,8 @@ from PyQt5.QtGui import QImage, QPixmap, QPalette, QPainter
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
     qApp, QFileDialog, QWidget, QHBoxLayout
 
+import os
+
 
 class QImageViewSync(QWidget):
     def __init__(self, parent):
@@ -145,6 +147,58 @@ class QImageViewSync(QWidget):
             if not self.window.fitToWindowAct.isChecked():
                 self.imageLabelRight.adjustSize()
 
+    def openBoth(self):
+        options = QFileDialog.Options()
+        # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
+        fileName, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
+                                                  'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
+
+        if fileName:
+            dir_, file_ = os.path.split(fileName)
+            root_dir = os.path.join(dir_, '../')
+            image_left = os.path.join(root_dir, 'original', file_)
+            image_right = os.path.join(root_dir, 'mask', file_)
+
+            # for left
+            print('left : ', image_left)
+            image = QImage(image_left)
+            if image.isNull():
+                QMessageBox.information(self, "Pruebas de validación", "Cannot load %s." % image_left)
+                return
+
+            self.imageLabelLeft.setPixmap(QPixmap.fromImage(image))
+            self.imageLabelLeft.mouseDoubleClickEvent = self.getPos
+            self.scaleFactor = 1.0
+
+            self.scrollAreaLeft.setVisible(True)
+
+            if not self.window.fitToWindowAct.isChecked():
+                self.imageLabelLeft.adjustSize()
+
+            # for right
+            print('right : ', image_right)
+            image = QImage(image_right)
+            if image.isNull():
+                QMessageBox.information(self, "Pruebas de validación", "Cannot load %s." % image_right)
+                return
+
+            self.imageLabelRight.setPixmap(QPixmap.fromImage(image))
+            self.imageLabelRight.mouseDoubleClickEvent = self.getPos
+            self.scaleFactor = 1.0
+
+            self.scrollAreaRight.setVisible(True)
+
+            if not self.window.fitToWindowAct.isChecked():
+                self.imageLabelRight.adjustSize()
+
+            self.window.fitToWindowAct.setEnabled(True)
+            self.updateActions()
+
+    def clear(self):
+        self.scrollAreaLeft.setVisible(False)
+        self.scrollAreaRight.setVisible(False)
+        self.parent.statusbar.showMessage('Ready')
+
     def zoomIn(self):
         self.scaleImage(1.25)
 
@@ -218,6 +272,9 @@ class MainWindow(QMainWindow):
     def createActions(self, view):
         self.openLeftAct = QAction("&Open Left...", self, shortcut="Ctrl+L", triggered=view.openLeft)
         self.openRightAct = QAction("&Open Right...", self, shortcut="Shift+Ctrl+L", triggered=view.openRight)
+        self.openBothAct = QAction("&Open Both...", self, shortcut="Shift+Ctrl+O", triggered=view.openBoth)
+        self.closeAct = QAction("&Close...", self, shortcut="Shift+R", triggered=view.clear)
+
         # self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=image.close)
         self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl+I", enabled=False, triggered=view.zoomIn)
         self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+O", enabled=False, triggered=view.zoomOut)
@@ -231,6 +288,8 @@ class MainWindow(QMainWindow):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openLeftAct)
         self.fileMenu.addAction(self.openRightAct)
+        self.fileMenu.addAction(self.openBothAct)
+        self.fileMenu.addAction(self.closeAct)
         self.fileMenu.addSeparator()
         # self.fileMenu.addAction(self.exitAct)
 
