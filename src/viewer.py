@@ -94,31 +94,6 @@ class QImageViewSync(QWidget):
             self.scrollAreaRight.horizontalScrollBar().setValue(self.initialPosX - event.pos().x())
             self.scrollAreaRight.verticalScrollBar().setValue(self.initialPosY - event.pos().y())
 
-    def open(self):
-        options = QFileDialog.Options()
-        # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
-        fileName, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
-                                                  'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
-        if fileName:
-            print(fileName)
-            image = QImage(fileName)
-            if image.isNull():
-                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
-                return
-
-            self.imageLabelLeft.setPixmap(QPixmap.fromImage(image))
-            self.imageLabelRight.setPixmap(QPixmap.fromImage(image))
-            self.scaleFactor = 1.0
-
-            self.scrollAreaLeft.setVisible(True)
-            self.scrollAreaRight.setVisible(True)
-            self.window.fitToWindowAct.setEnabled(True)
-            self.updateActions()
-
-            if not self.window.fitToWindowAct.isChecked():
-                self.imageLabelLeft.adjustSize()
-                self.imageLabelRight.adjustSize()
-
     def getPos(self, event):
         self.parent.statusbar.showMessage(
             '{} , {}'.format(event.pos().x() / self.scaleFactor, event.pos().y() / self.scaleFactor)
