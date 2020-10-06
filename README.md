@@ -46,14 +46,14 @@ $ python viewer.py
 >
 > using `Open Both...`, there is required structure below:
 ```
+# use the same filename for each sub-directory
 ROOT
 ├── original
 │   ├── image.png
-│   ├── ...
+│   └── ...
 └── mask
     ├── image.png
-    ├── ...
-
+    └── ...
 ```
 > after all, following menu items (will be update)
 
