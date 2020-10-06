@@ -6,7 +6,7 @@
 </p>
 
 > acceptance testing, image viewer for validation
-
+> ![test](etc/test.gif)
 ## Author
 
 👤 **Changwoo Song**
