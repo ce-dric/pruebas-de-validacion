@@ -8,10 +8,11 @@ from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMain
 
 
 class QImageViewSync(QWidget):
-    def __init__(self, window=None):
-        super().__init__()
+    def __init__(self, parent):
+        super(QImageViewSync, self).__init__(parent)
 
-        self.window = window
+        self.parent = parent
+        self.window = parent
         self.scaleFactor = 0.0
 
         self.imageLabelLeft = QLabel()
@@ -119,7 +120,9 @@ class QImageViewSync(QWidget):
                 self.imageLabelRight.adjustSize()
 
     def getPos(self, event):
-        print(event.pos().x(), ', ', event.pos().y())
+        self.parent.statusbar.showMessage(
+            '{} , {}'.format(event.pos().x() / self.scaleFactor, event.pos().y() / self.scaleFactor)
+        )
 
     def openLeft(self):
         options = QFileDialog.Options()
@@ -214,10 +217,11 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.imageViewSync = QImageViewSync(window=self)
+        self.imageViewSync = QImageViewSync(self)
         self.setCentralWidget(self.imageViewSync.centralWidget)
 
-        self.statusBar().showMessage('Ready')
+        self.statusbar = self.statusBar()
+        self.statusbar.showMessage('Ready')
 
         self.createActions(self.imageViewSync)
         self.createMenus()
