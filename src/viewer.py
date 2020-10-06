@@ -160,6 +160,7 @@ class QImageViewSync(QWidget):
                 return
 
             self.imageLabelRight.setPixmap(QPixmap.fromImage(image))
+            self.imageLabelRight.mouseDoubleClickEvent = self.getPos
             self.scaleFactor = 1.0
 
             self.scrollAreaRight.setVisible(True)
@@ -226,7 +227,7 @@ class MainWindow(QMainWindow):
         self.createActions(self.imageViewSync)
         self.createMenus()
 
-        self.setWindowTitle("Image View Sync in the Main Window")
+        self.setWindowTitle("Pruebas de validación")
         self.resize(1200, 600)
 
 
@@ -240,11 +241,11 @@ class MainWindow(QMainWindow):
         self.imageViewSync.updateActions()
 
     def createActions(self, view):
-        self.openLeftAct = QAction("&Open Left...", self, shortcut="Ctrl+O", triggered=view.openLeft)
-        self.openRightAct = QAction("&Open Right...", self, shortcut="Shift+Ctrl+O", triggered=view.openRight)
+        self.openLeftAct = QAction("&Open Left...", self, shortcut="Ctrl+L", triggered=view.openLeft)
+        self.openRightAct = QAction("&Open Right...", self, shortcut="Shift+Ctrl+L", triggered=view.openRight)
         # self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=image.close)
-        self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl++", enabled=False, triggered=view.zoomIn)
-        self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+-", enabled=False, triggered=view.zoomOut)
+        self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl+I", enabled=False, triggered=view.zoomIn)
+        self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+O", enabled=False, triggered=view.zoomOut)
         self.normalSizeAct = QAction("&Normal Size", self, shortcut="Ctrl+S", enabled=False, triggered=view.normalSize)
         self.fitToWindowAct = QAction("&Fit to Window", self,
                                       enabled=False, checkable=True, shortcut="Ctrl+F", triggered=self.fitToWindow)
