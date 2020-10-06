@@ -62,6 +62,9 @@ class QImageViewSync(QWidget):
         self.imageLabelLeft.setCursor(Qt.OpenHandCursor)
         self.imageLabelRight.setCursor(Qt.OpenHandCursor)
 
+        self.is_load_image_left = False
+        self.is_load_image_right = False
+
     def mousePressEventLeft(self, event):
         self.pressed = True
         self.imageLabelLeft.setCursor(Qt.ClosedHandCursor)
@@ -97,9 +100,9 @@ class QImageViewSync(QWidget):
             self.scrollAreaRight.verticalScrollBar().setValue(self.initialPosY - event.pos().y())
 
     def getPos(self, event):
-        self.parent.statusbar.showMessage(
-            '{} , {}'.format(event.pos().x() / self.scaleFactor, event.pos().y() / self.scaleFactor)
-        )
+        msg = '[point] {} , {}'.format(event.pos().x() / self.scaleFactor, event.pos().y() / self.scaleFactor)
+        print(msg)
+        self.parent.statusbar.showMessage(msg)
 
     def openLeft(self):
         options = QFileDialog.Options()
@@ -107,6 +110,7 @@ class QImageViewSync(QWidget):
         fileName, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
                                                   'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
         if fileName:
+            dir_, file_ = os.path.split(fileName)
             print(fileName)
             image = QImage(fileName)
             if image.isNull():
@@ -124,12 +128,19 @@ class QImageViewSync(QWidget):
             if not self.window.fitToWindowAct.isChecked():
                 self.imageLabelLeft.adjustSize()
 
+            self.parent.statusbar.showMessage('[left image loaded] {}'.format(file_))
+
+            self.is_load_image_left = True
+            if self.is_load_image_right:
+                self.parent.setWindowTitle(file_)
+
     def openRight(self):
         options = QFileDialog.Options()
         # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         fileName, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
                                                   'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
         if fileName:
+            dir_, file_ = os.path.split(fileName)
             print(fileName)
             image = QImage(fileName)
             if image.isNull():
@@ -147,6 +158,12 @@ class QImageViewSync(QWidget):
             if not self.window.fitToWindowAct.isChecked():
                 self.imageLabelRight.adjustSize()
 
+            self.parent.statusbar.showMessage('[right image loaded] {}'.format(file_))
+
+            self.is_load_image_right = True
+            if self.is_load_image_left:
+                self.parent.setWindowTitle(file_)
+
     def openBoth(self):
         options = QFileDialog.Options()
         # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
@@ -159,8 +176,7 @@ class QImageViewSync(QWidget):
             image_left = os.path.join(root_dir, 'original', file_)
             image_right = os.path.join(root_dir, 'mask', file_)
 
-            # for left
-            print('left : ', image_left)
+            # load left
             image = QImage(image_left)
             if image.isNull():
                 QMessageBox.information(self, "Pruebas de validación", "Cannot load %s." % image_left)
@@ -175,8 +191,7 @@ class QImageViewSync(QWidget):
             if not self.window.fitToWindowAct.isChecked():
                 self.imageLabelLeft.adjustSize()
 
-            # for right
-            print('right : ', image_right)
+            # load right
             image = QImage(image_right)
             if image.isNull():
                 QMessageBox.information(self, "Pruebas de validación", "Cannot load %s." % image_right)
@@ -193,22 +208,32 @@ class QImageViewSync(QWidget):
 
             self.window.fitToWindowAct.setEnabled(True)
             self.updateActions()
+            self.parent.setWindowTitle(file_)
+            self.parent.statusbar.showMessage('[both images loaded] {}'.format(file_))
 
     def clear(self):
+        self.is_load_image_left = False
+        self.is_load_image_right = False
+
         self.scrollAreaLeft.setVisible(False)
         self.scrollAreaRight.setVisible(False)
-        self.parent.statusbar.showMessage('Ready')
+
+        self.parent.setWindowTitle('Pruebas de validación')
+        self.parent.statusbar.showMessage('Load images')
 
     def zoomIn(self):
         self.scaleImage(1.25)
+        self.parent.statusbar.showMessage('[zoom-in] scale factor : {}'.format(self.scaleFactor))
 
     def zoomOut(self):
         self.scaleImage(0.8)
+        self.parent.statusbar.showMessage('[zoom-out] scale factor : {}'.format(self.scaleFactor))
 
     def normalSize(self):
         self.imageLabelLeft.adjustSize()
         self.imageLabelRight.adjustSize()
         self.scaleFactor = 1.0
+        self.parent.statusbar.showMessage('[original size] scale factor : {}'.format(self.scaleFactor))
 
     def about(self):
         QMessageBox.about(self, "Pruebas de validación",
@@ -251,7 +276,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.imageViewSync.centralWidget)
 
         self.statusbar = self.statusBar()
-        self.statusbar.showMessage('Ready')
+        self.statusbar.showMessage('Load images')
 
         self.createActions(self.imageViewSync)
         self.createMenus()
@@ -273,7 +298,7 @@ class MainWindow(QMainWindow):
         self.openLeftAct = QAction("&Open Left...", self, shortcut="Ctrl+L", triggered=view.openLeft)
         self.openRightAct = QAction("&Open Right...", self, shortcut="Shift+Ctrl+L", triggered=view.openRight)
         self.openBothAct = QAction("&Open Both...", self, shortcut="Shift+Ctrl+O", triggered=view.openBoth)
-        self.closeAct = QAction("&Close...", self, shortcut="Shift+R", triggered=view.clear)
+        self.clearAct = QAction("&Clear...", self, shortcut="Shift+R", triggered=view.clear)
 
         # self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=image.close)
         self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl+I", enabled=False, triggered=view.zoomIn)
@@ -288,8 +313,10 @@ class MainWindow(QMainWindow):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openLeftAct)
         self.fileMenu.addAction(self.openRightAct)
+        self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.openBothAct)
-        self.fileMenu.addAction(self.closeAct)
+        self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.clearAct)
         self.fileMenu.addSeparator()
         # self.fileMenu.addAction(self.exitAct)
 
