@@ -3,7 +3,6 @@
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap, QPalette, QPainter
-from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
     qApp, QFileDialog, QWidget, QHBoxLayout
 
@@ -13,7 +12,6 @@ class QImageViewSync(QWidget):
         super().__init__()
 
         self.window = window
-        self.printer = QPrinter()
         self.scaleFactor = 0.0
 
         self.imageLabelLeft = QLabel()
@@ -113,14 +111,15 @@ class QImageViewSync(QWidget):
 
             self.scrollAreaLeft.setVisible(True)
             self.scrollAreaRight.setVisible(True)
-            self.window.printLeftAct.setEnabled(True)
-            self.window.printRightAct.setEnabled(True)
             self.window.fitToWindowAct.setEnabled(True)
             self.updateActions()
 
             if not self.window.fitToWindowAct.isChecked():
                 self.imageLabelLeft.adjustSize()
                 self.imageLabelRight.adjustSize()
+
+    def getPos(self, event):
+        print(event.pos().x(), ', ', event.pos().y())
 
     def openLeft(self):
         options = QFileDialog.Options()
@@ -131,14 +130,14 @@ class QImageViewSync(QWidget):
             print(fileName)
             image = QImage(fileName)
             if image.isNull():
-                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
+                QMessageBox.information(self, "Pruebas de validación", "Cannot load %s." % fileName)
                 return
 
             self.imageLabelLeft.setPixmap(QPixmap.fromImage(image))
+            self.imageLabelLeft.mouseDoubleClickEvent = self.getPos
             self.scaleFactor = 1.0
 
             self.scrollAreaLeft.setVisible(True)
-            self.window.printLeftAct.setEnabled(True)
             self.window.fitToWindowAct.setEnabled(True)
             self.updateActions()
 
@@ -154,41 +153,18 @@ class QImageViewSync(QWidget):
             print(fileName)
             image = QImage(fileName)
             if image.isNull():
-                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
+                QMessageBox.information(self, "Pruebas de validación", "Cannot load %s." % fileName)
                 return
 
             self.imageLabelRight.setPixmap(QPixmap.fromImage(image))
             self.scaleFactor = 1.0
 
             self.scrollAreaRight.setVisible(True)
-            self.window.printRightAct.setEnabled(True)
             self.window.fitToWindowAct.setEnabled(True)
             self.updateActions()
 
             if not self.window.fitToWindowAct.isChecked():
                 self.imageLabelRight.adjustSize()
-
-    def printLeft(self):
-        dialog = QPrintDialog(self.printer, self)
-        if dialog.exec_():
-            painter = QPainter(self.printer)
-            rect = painter.viewport()
-            size = self.imageLabelLeft.pixmap().size()
-            size.scale(rect.size(), Qt.KeepAspectRatio)
-            painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
-            painter.setWindow(self.imageLabelLeft.pixmap().rect())
-            painter.drawPixmap(0, 0, self.imageLabelLeft.pixmap())
-
-    def printRight(self):
-        dialog = QPrintDialog(self.printer, self)
-        if dialog.exec_():
-            painter = QPainter(self.printer)
-            rect = painter.viewport()
-            size = self.imageLabelRight.pixmap().size()
-            size.scale(rect.size(), Qt.KeepAspectRatio)
-            painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
-            painter.setWindow(self.imageLabelRight.pixmap().rect())
-            painter.drawPixmap(0, 0, self.imageLabelRight.pixmap())
 
     def zoomIn(self):
         self.scaleImage(1.25)
@@ -202,20 +178,14 @@ class QImageViewSync(QWidget):
         self.scaleFactor = 1.0
 
     def about(self):
-        QMessageBox.about(self, "Image View in the Main Window",
-                          "<p>The <b>Image Viewer</b> example shows how to combine "
-                          "QLabel and QScrollArea to display an image. QLabel is "
-                          "typically used for displaying text, but it can also display "
-                          "an image. QScrollArea provides a scrolling view around "
-                          "another widget. If the child widget exceeds the size of the "
-                          "frame, QScrollArea automatically provides scroll bars.</p>"
-                          "<p>The example demonstrates how QLabel's ability to scale "
-                          "its contents (QLabel.scaledContents), and QScrollArea's "
-                          "ability to automatically resize its contents "
-                          "(QScrollArea.widgetResizable), can be used to implement "
-                          "zooming and scaling features.</p>"
-                          "<p>In addition the example shows how to use QPainter to "
-                          "print an image.</p>")
+        QMessageBox.about(self, "Pruebas de validación",
+                          "<p>In engineering and its various sub-disciplines, acceptance testing is a test conducted to"
+                          " determine if the requirements of a specification or contract are met. "
+                          "It may involve chemical tests, physical tests, or performance tests.</p>"
+                          "<p>In systems engineering, it may involve black-box testing performed on a system "
+                          "(for example: a piece of software, lots of manufactured mechanical parts, "
+                          "or batches of chemical products) prior to its delivery.</p>"
+                          )
 
     def updateActions(self):
         self.window.zoomInAct.setEnabled(not self.window.fitToWindowAct.isChecked())
@@ -247,11 +217,14 @@ class MainWindow(QMainWindow):
         self.imageViewSync = QImageViewSync(window=self)
         self.setCentralWidget(self.imageViewSync.centralWidget)
 
+        self.statusBar().showMessage('Ready')
+
         self.createActions(self.imageViewSync)
         self.createMenus()
 
         self.setWindowTitle("Image View Sync in the Main Window")
         self.resize(1200, 600)
+
 
     def fitToWindow(self):
         fitToWindow = self.fitToWindowAct.isChecked()
@@ -265,9 +238,6 @@ class MainWindow(QMainWindow):
     def createActions(self, view):
         self.openLeftAct = QAction("&Open Left...", self, shortcut="Ctrl+O", triggered=view.openLeft)
         self.openRightAct = QAction("&Open Right...", self, shortcut="Shift+Ctrl+O", triggered=view.openRight)
-        self.printLeftAct = QAction("&Print Left...", self, shortcut="Ctrl+P", enabled=False, triggered=view.printLeft)
-        self.printRightAct = QAction("&Print Right...", self,
-                                     shortcut="Shift+Ctrl+P", enabled=False, triggered=view.printRight)
         # self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=image.close)
         self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl++", enabled=False, triggered=view.zoomIn)
         self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+-", enabled=False, triggered=view.zoomOut)
@@ -281,9 +251,6 @@ class MainWindow(QMainWindow):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openLeftAct)
         self.fileMenu.addAction(self.openRightAct)
-        self.fileMenu.addSeparator()
-        self.fileMenu.addAction(self.printLeftAct)
-        self.fileMenu.addAction(self.printRightAct)
         self.fileMenu.addSeparator()
         # self.fileMenu.addAction(self.exitAct)
 
