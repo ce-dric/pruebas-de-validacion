@@ -6,6 +6,7 @@
 </p>
 
 > acceptance testing, image viewer for validation
+>
 > ![test](etc/test.gif)
 ## Author
 
@@ -40,6 +41,19 @@ $ pip install PyQt5
 $ cd path/to/project
 $ cd src/
 $ python viewer.py
+```
+![test](etc/demo1.png)
+>
+> using `Open Both...`, there is required structure below:
+```
+ROOT
+├── original
+│   ├── image.png
+│   ├── ...
+└── mask
+    ├── image.png
+    ├── ...
+
 ```
 > after all, following menu items (will be update)
 
