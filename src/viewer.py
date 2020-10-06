@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QImage, QPixmap, QPalette, QPainter
+from PyQt5.QtCore import Qt, QEventLoop, QTimer
+from PyQt5.QtGui import QImage, QPixmap, QPalette, QGuiApplication
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
     qApp, QFileDialog, QWidget, QHBoxLayout
 
@@ -119,6 +119,7 @@ class QImageViewSync(QWidget):
 
             self.imageLabelLeft.setPixmap(QPixmap.fromImage(image))
             self.imageLabelLeft.mouseDoubleClickEvent = self.getPos
+            self.imageLabelLeft.wheelEvent = self.wheel
             self.scaleFactor = 1.0
 
             self.scrollAreaLeft.setVisible(True)
@@ -149,6 +150,7 @@ class QImageViewSync(QWidget):
 
             self.imageLabelRight.setPixmap(QPixmap.fromImage(image))
             self.imageLabelRight.mouseDoubleClickEvent = self.getPos
+            self.imageLabelRight.wheelEvent = self.wheel
             self.scaleFactor = 1.0
 
             self.scrollAreaRight.setVisible(True)
@@ -184,6 +186,7 @@ class QImageViewSync(QWidget):
 
             self.imageLabelLeft.setPixmap(QPixmap.fromImage(image))
             self.imageLabelLeft.mouseDoubleClickEvent = self.getPos
+            self.imageLabelLeft.wheelEvent = self.wheel
             self.scaleFactor = 1.0
 
             self.scrollAreaLeft.setVisible(True)
@@ -199,6 +202,7 @@ class QImageViewSync(QWidget):
 
             self.imageLabelRight.setPixmap(QPixmap.fromImage(image))
             self.imageLabelRight.mouseDoubleClickEvent = self.getPos
+            self.imageLabelRight.wheelEvent = self.wheel
             self.scaleFactor = 1.0
 
             self.scrollAreaRight.setVisible(True)
@@ -221,6 +225,11 @@ class QImageViewSync(QWidget):
         self.parent.setWindowTitle('Pruebas de validación')
         self.parent.statusbar.showMessage('Load images')
 
+    def sleep(self):
+        loop = QEventLoop()
+        QTimer.singleShot(500, loop.quit)
+        loop.exec_()
+
     def zoomIn(self):
         self.scaleImage(1.25)
         self.parent.statusbar.showMessage('[zoom-in] scale factor : {}'.format(self.scaleFactor))
@@ -228,6 +237,16 @@ class QImageViewSync(QWidget):
     def zoomOut(self):
         self.scaleImage(0.8)
         self.parent.statusbar.showMessage('[zoom-out] scale factor : {}'.format(self.scaleFactor))
+
+    def wheel(self, event):
+        modifiers = QGuiApplication.keyboardModifiers()
+        if modifiers == Qt.ControlModifier:
+            if event.angleDelta().y() > 0:
+                self.zoomIn()
+                self.sleep()
+            elif event.angleDelta().y() < 0:
+                self.zoomOut()
+                self.sleep()
 
     def normalSize(self):
         self.imageLabelLeft.adjustSize()
