@@ -5,16 +5,19 @@
   </a>
 </p>
 
-> acceptance testing, image viewer for validation
->
-> ![test](etc/test.gif)
+> 'pruebas-de-validacion' means acceptance testing,<br>
+> ![test](etc/test.gif) <br>
+> image viewer for parallel comparison
+> ![demo](etc/demo.png) <br>
+
 ## Author
 
 👤 **Changwoo Song**
 
 > Github: [@Odin-son](https://github.com/Odin-son) <br>
-> LinkedIn: [@mdsd12](https://linkedin.com/in/mdsd12)
-
+> LinkedIn: [@mdsd12](https://linkedin.com/in/mdsd12) <br>
+> 
+> This project was inspired from [acbetter](https://gist.github.com/acbetter/e7d0c600fdc0865f4b0ee05a17b858f2)
 ## Requirements
 * library
     * PyQt5
@@ -72,6 +75,5 @@ Aborted (core dumped)
 > sudo apt-get install "^libxcb.*" libx11-xcb-dev libglu1-mesa-dev libxrender-dev
 
 ## 📝 License
-
 Copyright © 2020 [Changwoo Song](https://github.com/Odin-son).
 This project is [MIT](https://github.com/Odin-son/pruebas-de-validacion/blob/main/LICENSE) licensed.
