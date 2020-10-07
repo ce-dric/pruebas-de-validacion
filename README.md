@@ -5,9 +5,9 @@
   </a>
 </p>
 
-> acceptance testing, image viewer for validation
->
-> ![test](etc/test.gif)
+> 'pruebas-de-validacion' means acceptance testing,<br>
+> ![test](etc/test.gif) <br>
+> image viewer for parallel comparison
 ## Author
 
 👤 **Changwoo Song**
