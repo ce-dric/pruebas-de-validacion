@@ -8,6 +8,8 @@
 > 'pruebas-de-validacion' means acceptance testing,<br>
 > ![test](etc/test.gif) <br>
 > image viewer for parallel comparison
+> ![demo](etc/demo.png) <br>
+
 ## Author
 
 👤 **Changwoo Song**
