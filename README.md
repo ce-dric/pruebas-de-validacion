@@ -35,7 +35,8 @@ $ conda activate [env_name]
 ```
 > install required library(CLI)
 ```
-$ pip install PyQt5 
+$ pip install PyQt5
+$ pip insatll pyperclip 
 ```
 
 ## How to use
