@@ -6,6 +6,7 @@ from PyQt5.QtGui import QImage, QPixmap, QPalette, QGuiApplication
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
     qApp, QFileDialog, QWidget, QHBoxLayout
 
+import pyperclip
 import os
 
 
@@ -101,6 +102,7 @@ class QImageViewSync(QWidget):
 
     def getPos(self, event):
         msg = '[point] {} , {}'.format(event.pos().x() / self.scaleFactor, event.pos().y() / self.scaleFactor)
+        pyperclip.copy('({}, {})'.format(int(event.pos().x() / self.scaleFactor), int(event.pos().y() / self.scaleFactor)))
         print(msg)
         self.parent.statusbar.showMessage(msg)
 
