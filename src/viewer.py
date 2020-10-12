@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMain
 
 import pyperclip
 import os
+import time
 
 
 class QImageViewSync(QWidget):
@@ -65,6 +66,7 @@ class QImageViewSync(QWidget):
 
         self.is_load_image_left = False
         self.is_load_image_right = False
+        self.log_file_path = '../log.txt'
 
     def mousePressEventLeft(self, event):
         self.pressed = True
@@ -101,10 +103,25 @@ class QImageViewSync(QWidget):
             self.scrollAreaRight.verticalScrollBar().setValue(self.initialPosY - event.pos().y())
 
     def getPos(self, event):
-        msg = '[point] {} , {}'.format(event.pos().x() / self.scaleFactor, event.pos().y() / self.scaleFactor)
-        pyperclip.copy('({}, {})'.format(int(event.pos().x() / self.scaleFactor), int(event.pos().y() / self.scaleFactor)))
-        print(msg)
-        self.parent.statusbar.showMessage(msg)
+        msg = '({}, {})'.format(int(event.pos().x() / self.scaleFactor), int(event.pos().y() / self.scaleFactor))
+        pyperclip.copy(msg)
+        status_msg = '[point] {}'.format(msg)
+        self.parent.statusbar.showMessage(status_msg)
+        self.writeLog(status_msg)
+
+    def writeLog(self, message):
+        if not os.path.isfile(self.log_file_path):
+            print('log file does not exist')
+            print('create log file...')
+            file_ = open(self.log_file_path, "w")
+            file_.close()
+            print('file creation : {}'.format(self.log_file_path))
+
+        now = time.localtime()
+        with open(self.log_file_path, "a") as file:
+            log_ = '{}/{}/{} {}:{} | {}\n'.format(now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, message)
+            file.write(log_)
+            file.close()
 
     def openLeft(self):
         options = QFileDialog.Options()
@@ -113,7 +130,6 @@ class QImageViewSync(QWidget):
                                                   'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
         if fileName:
             dir_, file_ = os.path.split(fileName)
-            print(fileName)
             image = QImage(fileName)
             if image.isNull():
                 QMessageBox.information(self, "Pruebas de validación", "Cannot load %s." % fileName)
@@ -131,7 +147,9 @@ class QImageViewSync(QWidget):
             if not self.window.fitToWindowAct.isChecked():
                 self.imageLabelLeft.adjustSize()
 
-            self.parent.statusbar.showMessage('[left image loaded] {}'.format(file_))
+            msg = '[left image loaded] {}'.format(file_)
+            self.parent.statusbar.showMessage(msg)
+            self.writeLog(msg)
 
             self.is_load_image_left = True
             if self.is_load_image_right:
@@ -144,7 +162,6 @@ class QImageViewSync(QWidget):
                                                   'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
         if fileName:
             dir_, file_ = os.path.split(fileName)
-            print(fileName)
             image = QImage(fileName)
             if image.isNull():
                 QMessageBox.information(self, "Pruebas de validación", "Cannot load %s." % fileName)
@@ -162,7 +179,9 @@ class QImageViewSync(QWidget):
             if not self.window.fitToWindowAct.isChecked():
                 self.imageLabelRight.adjustSize()
 
-            self.parent.statusbar.showMessage('[right image loaded] {}'.format(file_))
+            msg = '[right image loaded] {}'.format(file_)
+            self.parent.statusbar.showMessage(msg)
+            self.writeLog(msg)
 
             self.is_load_image_right = True
             if self.is_load_image_left:
@@ -215,7 +234,9 @@ class QImageViewSync(QWidget):
             self.window.fitToWindowAct.setEnabled(True)
             self.updateActions()
             self.parent.setWindowTitle(file_)
-            self.parent.statusbar.showMessage('[both images loaded] {}'.format(file_))
+            msg = '[both images loaded] {}'.format(file_)
+            self.parent.statusbar.showMessage(msg)
+            self.writeLog(msg)
 
     def clear(self):
         self.is_load_image_left = False
@@ -226,6 +247,7 @@ class QImageViewSync(QWidget):
 
         self.parent.setWindowTitle('Pruebas de validación')
         self.parent.statusbar.showMessage('Load images')
+        self.writeLog('clear')
 
     def sleep(self):
         loop = QEventLoop()
