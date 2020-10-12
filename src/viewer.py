@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5.QtCore import Qt, QEventLoop, QTimer
-from PyQt5.QtGui import QImage, QPixmap, QPalette, QGuiApplication
+from PyQt5.QtGui import QImage, QPixmap, QPalette, QGuiApplication, QIcon
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
     qApp, QFileDialog, QWidget, QHBoxLayout
 
@@ -304,7 +304,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Pruebas de validación")
         self.resize(1200, 600)
-
+        self.setWindowIcon(QIcon("../etc/parallel.png"))
 
     def fitToWindow(self):
         fitToWindow = self.fitToWindowAct.isChecked()
