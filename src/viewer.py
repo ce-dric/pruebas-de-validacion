@@ -4,7 +4,7 @@
 from PyQt5.QtCore import Qt, QEventLoop, QTimer
 from PyQt5.QtGui import QImage, QPixmap, QPalette, QGuiApplication, QIcon
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
-    qApp, QFileDialog, QWidget, QHBoxLayout
+    qApp, QFileDialog, QWidget, QHBoxLayout, QDialog, QVBoxLayout, QLineEdit, QPushButton
 
 import pyperclip
 import os
@@ -67,6 +67,9 @@ class QImageViewSync(QWidget):
         self.is_load_image_left = False
         self.is_load_image_right = False
         self.log_file_path = '../log.txt'
+        self.pressed = False
+        self.initialPosX = 0
+        self.initialPosY = 0
 
     def mousePressEventLeft(self, event):
         self.pressed = True
@@ -108,6 +111,25 @@ class QImageViewSync(QWidget):
         status_msg = '[point] {}'.format(msg)
         self.parent.statusbar.showMessage(status_msg)
         self.writeLog(status_msg)
+
+    def findLocation(self):
+        """
+        ag = QDesktopWidget().availableGeometry()
+        sg = QDesktopWidget().screenGeometry()
+
+        widget = self.geometry()
+        pos_x = ag.width() - widget.width()
+        pos_y = 2 * ag.height() - sg.height() - widget.height()
+        """
+        window = FindWindow()
+
+        if window.showModal():
+            from_window_x = window.edit_x.text()
+            from_window_y = window.edit_y.text()
+            centered_x = float(from_window_x) * self.scaleFactor - self.scrollAreaLeft.frameGeometry().width() / 2
+            centered_y = float(from_window_y) * self.scaleFactor - self.scrollAreaLeft.frameGeometry().height() / 2
+            self.scrollAreaLeft.horizontalScrollBar().setValue(centered_x)
+            self.scrollAreaLeft.verticalScrollBar().setValue(centered_y)
 
     def writeLog(self, message):
         if not os.path.isfile(self.log_file_path):
@@ -311,6 +333,56 @@ class QImageViewSync(QWidget):
                                + ((factor - 1) * scrollBar.pageStep() / 2)))
 
 
+class FindWindow(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.pos_y = 100
+        self.pos_x = 100
+        self.edit_x = QLineEdit()
+        self.edit_y = QLineEdit()
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('find location')
+        self.setGeometry(100, 100, 300, 100)
+        layout = QVBoxLayout()
+        layout.addStretch(1)
+        # x , y
+        input_layout = QHBoxLayout()
+        label_x = QLabel("x : ")
+        self.edit_x.font().setPointSize(15)
+        label_y = QLabel("y : ")
+        self.edit_y.font().setPointSize(15)
+        input_layout.addWidget(label_x)
+        input_layout.addWidget(self.edit_x)
+        input_layout.addWidget(label_y)
+        input_layout.addWidget(self.edit_y)
+        layout.addLayout(input_layout)
+
+        # find , cancel
+        btn_ok = QPushButton("find")
+        btn_ok.clicked.connect(self.onOKButtonClicked)
+        btn_cancel = QPushButton("cancel")
+        btn_cancel.clicked.connect(self.onCancelButtonClicked)
+
+        sub_layout = QHBoxLayout()
+        sub_layout.addWidget(btn_ok)
+        sub_layout.addWidget(btn_cancel)
+
+        layout.addLayout(sub_layout)
+        layout.addStretch(1)
+        self.setLayout(layout)
+
+    def onOKButtonClicked(self):
+        self.accept()
+
+    def onCancelButtonClicked(self):
+        self.reject()
+
+    def showModal(self):
+        return super().exec_()
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -343,12 +415,14 @@ class MainWindow(QMainWindow):
         self.openBothAct = QAction("&Open Both...", self, shortcut="Shift+Ctrl+O", triggered=view.openBoth)
         self.clearAct = QAction("&Clear...", self, shortcut="Shift+R", triggered=view.clear)
 
+        self.findAct = QAction("&Find...", self, shortcut="Ctrl+F", triggered=view.findLocation)
+
         # self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=image.close)
         self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl+I", enabled=False, triggered=view.zoomIn)
         self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+O", enabled=False, triggered=view.zoomOut)
         self.normalSizeAct = QAction("&Normal Size", self, shortcut="Ctrl+S", enabled=False, triggered=view.normalSize)
         self.fitToWindowAct = QAction("&Fit to Window", self,
-                                      enabled=False, checkable=True, shortcut="Ctrl+F", triggered=self.fitToWindow)
+                                      enabled=False, checkable=True, shortcut="Ctrl+T", triggered=self.fitToWindow)
         self.aboutAct = QAction("&About", self, triggered=view.about)
         self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
 
@@ -369,6 +443,8 @@ class MainWindow(QMainWindow):
         self.viewMenu.addAction(self.normalSizeAct)
         self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.fitToWindowAct)
+        self.viewMenu.addSeparator()
+        self.viewMenu.addAction(self.findAct)
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)
