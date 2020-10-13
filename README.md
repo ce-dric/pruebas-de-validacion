@@ -60,9 +60,11 @@ ROOT
     ├── image.png
     └── ...
 ```
-> in case using `Find...`, the viewer is located in the center based entered position
+> in case of using `Find...`, the viewer is located in the center based entered position
 >
 ![demo2](etc/demo2.png)
+> in case of using `Find Direct...`, the viewer is located in the center based on content of clipboard  
+> there is a function which is able to extract only number from content of clipboard
 ## Troubleshooting
 ```
 $ cd path/to/project

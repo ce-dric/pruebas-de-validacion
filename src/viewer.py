@@ -127,6 +127,30 @@ class QImageViewSync(QWidget):
             self.parent.statusbar.showMessage(status_msg)
             self.writeLog(status_msg)
 
+    def findDirect(self):
+        try:
+            from_clipboard_x = int(''.join(filter(str.isdigit, pyperclip.paste().split(",")[0])))
+            from_clipboard_y = int(''.join(filter(str.isdigit, pyperclip.paste().split(",")[1])))
+        except ValueError:
+            msg = '[error] invalid literal : {}'.format(pyperclip.paste())
+            self.parent.statusbar.showMessage(msg)
+            self.writeLog(msg)
+            return
+        except IndexError:
+            msg = '[error] list index out of range : {}'.format(pyperclip.paste())
+            self.parent.statusbar.showMessage(msg)
+            self.writeLog(msg)
+            return
+
+        centered_x = float(from_clipboard_x) * self.scaleFactor - self.scrollAreaLeft.frameGeometry().width() / 2
+        centered_y = float(from_clipboard_y) * self.scaleFactor - self.scrollAreaLeft.frameGeometry().height() / 2
+        self.scrollAreaLeft.horizontalScrollBar().setValue(centered_x)
+        self.scrollAreaLeft.verticalScrollBar().setValue(centered_y)
+
+        status_msg = '[direct move] ({}, {})'.format(from_clipboard_x, from_clipboard_y)
+        self.parent.statusbar.showMessage(status_msg)
+        self.writeLog(status_msg)
+
     def writeLog(self, message):
         if not os.path.isfile(self.log_file_path):
             print('log file does not exist')
@@ -137,7 +161,8 @@ class QImageViewSync(QWidget):
 
         now = time.localtime()
         with open(self.log_file_path, "a") as file:
-            log_ = '{}/{}/{} {}:{} | {}\n'.format(now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, message)
+            log_ = '{}/{}/{} {}:{} | {}\n'.format(now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min,
+                                                  message)
             file.write(log_)
             file.close()
 
@@ -412,6 +437,7 @@ class MainWindow(QMainWindow):
         self.clearAct = QAction("&Clear...", self, shortcut="Shift+R", triggered=view.clear)
 
         self.findAct = QAction("&Find...", self, shortcut="Ctrl+F", triggered=view.findLocation)
+        self.DirectAct = QAction("&Find Direct...", self, shortcut="Ctrl+Shift+F", triggered=view.findDirect)
 
         # self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=image.close)
         self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl+I", enabled=False, triggered=view.zoomIn)
@@ -441,6 +467,8 @@ class MainWindow(QMainWindow):
         self.viewMenu.addAction(self.fitToWindowAct)
         self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.findAct)
+        self.viewMenu.addAction(self.DirectAct)
+        self.viewMenu.addSeparator()
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)
