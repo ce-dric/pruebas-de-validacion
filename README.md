@@ -35,20 +35,21 @@ $ conda activate [env_name]
 ```
 > install required library(CLI)
 ```
-$ pip install PyQt5
-$ pip insatll pyperclip 
+$ pip install PyQt5 pyperclip 
 ```
 
 ## How to use
-> execute `viewer.py`
+> From now on, execute program by using command `python viewer.py`
 ```
 $ cd path/to/project
-$ cd src/
+$ cd src/``
 $ python viewer.py
 ```
-![test](etc/demo1.png)
+> Choose the menu items when the program runs
 >
-> using `Open Both...`, there is required structure below:
+![demo1](etc/demo1.png)
+>
+> Before using `Open Both...`, there is required structure below:
 ```
 # use the same filename for each sub-directory
 ROOT
@@ -59,8 +60,9 @@ ROOT
     ├── image.png
     └── ...
 ```
-> after all, following menu items (will be update)
-
+> in case using `Find...`, the viewer is located in the center based entered position
+>
+![demo2](etc/demo2.png)
 ## Troubleshooting
 ```
 $ cd path/to/project
