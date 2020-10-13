@@ -113,14 +113,6 @@ class QImageViewSync(QWidget):
         self.writeLog(status_msg)
 
     def findLocation(self):
-        """
-        ag = QDesktopWidget().availableGeometry()
-        sg = QDesktopWidget().screenGeometry()
-
-        widget = self.geometry()
-        pos_x = ag.width() - widget.width()
-        pos_y = 2 * ag.height() - sg.height() - widget.height()
-        """
         window = FindWindow()
 
         if window.showModal():
@@ -130,6 +122,10 @@ class QImageViewSync(QWidget):
             centered_y = float(from_window_y) * self.scaleFactor - self.scrollAreaLeft.frameGeometry().height() / 2
             self.scrollAreaLeft.horizontalScrollBar().setValue(centered_x)
             self.scrollAreaLeft.verticalScrollBar().setValue(centered_y)
+
+            status_msg = '[move] ({}, {})'.format(from_window_x, from_window_y)
+            self.parent.statusbar.showMessage(status_msg)
+            self.writeLog(status_msg)
 
     def writeLog(self, message):
         if not os.path.isfile(self.log_file_path):
