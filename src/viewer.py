@@ -170,7 +170,7 @@ class QImageViewSync(QWidget):
         options = QFileDialog.Options()
         # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         fileName, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
-                                                  'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
+                                                  'Images (*.png *.PNG *.jpeg *.jpg *.bmp *.gif)', options=options)
         if fileName:
             dir_, file_ = os.path.split(fileName)
             image = QImage(fileName)
@@ -202,7 +202,7 @@ class QImageViewSync(QWidget):
         options = QFileDialog.Options()
         # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         fileName, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
-                                                  'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
+                                                  'Images (*.png *.PNG *.jpeg *.jpg *.bmp *.gif)', options=options)
         if fileName:
             dir_, file_ = os.path.split(fileName)
             image = QImage(fileName)
@@ -234,7 +234,7 @@ class QImageViewSync(QWidget):
         options = QFileDialog.Options()
         # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         fileName, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
-                                                  'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
+                                                  'Images (*.png *.PNG *.jpeg *.jpg *.bmp *.gif)', options=options)
 
         if fileName:
             dir_, file_ = os.path.split(fileName)
